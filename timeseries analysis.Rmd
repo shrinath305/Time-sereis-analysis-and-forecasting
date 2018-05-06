@@ -1,0 +1,179 @@
+---
+title: "Timeseries analysis"
+author: "Shrinath"
+date: "May 5, 2018"
+output: html_document
+---
+
+#loading file 
+```{r}
+df <-  read.csv("C:/Users/patel/Downloads/TV_by_network_daypart.csv")
+
+str(df)
+library(dplyr)
+library(forecast)
+```
+
+#spiltting by daypart
+```{r}
+
+d <- levels(factor(df$daypart))
+
+daypart <- list()
+train_A <- list()
+test_A <- list()
+time_train_A <-  list()
+train_B <- list()
+test_B <- list()
+time_train_B <-  list()
+train_C <- list()
+test_C <- list()
+time_train_C <-  list()
+train_D <- list()
+test_D <- list()
+time_train_D <-  list()
+train_E <- list()
+test_E <- list()
+time_train_E <-  list()
+mse_A <- list()
+mse_B <- list()
+mse_C <- list()
+mse_D <- list()
+mse_E <- list()
+```
+
+```{r}
+for (i in 1:length(d)){
+  
+  daypart <- df %>% filter(daypart == d[i])
+################################################# Network A ############################################ 
+  #select "viewer" column from the datasets
+  train_A[[i]] <- assign(paste0("train", i),daypart %>% filter(date <201701 & network =="A") %>% select(viewers))
+  test_A[[i]] <- assign(paste0("test", i),daypart %>% filter(date >201612& network =="A")  %>% select(viewers))
+  time_train_A[[i]] <- assign(paste0("time_train", i), ts(train_A[[i]], frequency = 12, start = 2014))
+  decomposedRes <- decompose(time_train_A[[i]], type="additive")
+  plot(decomposedRes)
+  #stl <- stl(time_train_A[[i]], s.window="period")
+  acfRes <- acf(train_A[[i]]) # autocorrelation
+  pacfRes <- pacf(train_A[[i]])
+  hw <- HoltWinters(time_train_A[[i]])
+  plot(hw)
+  forecast <- forecast(hw, h = 12)
+  plot(forecast)
+  mse_A[[i]] <- mean(abs(test_A[[i]]$viewers-forecast$mean))
+
+  
+################################################# Network B ############################################ 
+
+  train_B[[i]] <- assign(paste0("train_b", i),daypart %>% filter(date <201701 & network =="B") %>% select(viewers))
+  test_B[[i]] <- assign(paste0("test_b", i),daypart %>% filter(date >201612& network =="B")  %>% select(viewers))
+  time_train_B[[i]] <- assign(paste0("time_train_b", i), ts(train_B[[i]], frequency = 12, start = 2014))
+  decomposedRes <- decompose(time_train_B[[i]], type="additive")
+  plot(decomposedRes)
+  #stl <- stl(time_train_B[[i]], s.window="period")
+  #acfRes <- acf(train_B[[i]]) # autocorrelation
+  #pacfRes <- pacf(train_B[[i]])
+  hw <- HoltWinters(time_train_B[[i]])
+  plot(hw)
+  forecast <- forecast(hw, h = 12)
+  # plot(forecast)
+  mse_B[[i]] <- mean(abs(test_B[[i]]$viewers-forecast$mean))
+
+################################################# Network C ############################################ 
+
+  train_C[[i]] <- assign(paste0("train_C", i),daypart %>% filter(date <201701 & network =="C") %>% select(viewers))
+  test_C[[i]] <- assign(paste0("test_C", i),daypart %>% filter(date >201612& network =="C")  %>% select(viewers))
+  time_train_C[[i]] <- assign(paste0("time_train_C", i), ts(train_C[[i]], frequency = 12, start = 2014))
+  decomposedRes <- decompose(time_train_C[[i]], type="additive")
+  plot(decomposedRes)
+  #stl <- stl(time_train_C[[i]], s.window="period")
+  acfRes <- acf(train_C[[i]]) # autocorrelation
+  pacfRes <- pacf(train_C[[i]])
+  hw <- HoltWinters(time_train_C[[i]])
+  plot(hw)
+  forecast <- forecast(hw, h = 12)
+  mse_C[i] <- mean(abs(test_C[[i]]$viewers-forecast$mean))
+
+  
+################################################# Network D ############################################  
+
+  train_D[[i]] <- assign(paste0("train_D", i),daypart %>% filter(date <201701 & network =="D") %>% select(viewers))
+  test_D[[i]] <- assign(paste0("test_D", i),daypart %>% filter(date >201612& network =="D")  %>% select(viewers))
+  time_train_D[[i]] <- assign(paste0("time_train_D", i), ts(train_D[[i]], frequency = 12, start = 2014))
+  decomposedRes <- decompose(time_train_D[[i]], type="additive")
+  plot(decomposedRes)
+  #stl <- stl(time_train_D[[i]], s.window="period")
+  acfRes <- acf(train_D[[i]]) # autocorrelation
+  pacfRes <- pacf(train_D[[i]])
+  hw <- HoltWinters(time_train_D[[i]])
+  plot(hw)
+  forecast <- forecast(hw, h = 12)
+  mse_D[i] <- mean(abs(test_D[[i]]$viewers-forecast$mean))
+
+  
+################################################# Network E #############################################  
+
+  train_E[[i]] <- assign(paste0("train_E", i),daypart %>% filter(date <201701 & network =="E") %>% select(viewers))
+  test_E[[i]] <- assign(paste0("test_E", i),daypart %>% filter(date >201612& network =="E")  %>% select(viewers))
+  time_train_E[[i]] <- assign(paste0("time_train_E", i), ts(train_E[[i]], frequency = 12, start = 2014))
+  decomposedRes <- decompose(time_train_E[[i]], type="additive")
+  plot(decomposedRes)
+  #stl <- stl(time_train_E[[i]], s.window="period")
+  #acfRes <- acf(train_E[[i]]) # autocorrelation
+  #pacfRes <- pacf(train_E[[i]])
+  hw <- HoltWinters(time_train_E[[i]])
+  plot(hw)
+  forecast <- forecast(hw, h = 12)
+  mse_E[[i]] <- mean(abs(test_E[[i]]$viewers-forecast$mean))
+
+
+}
+
+```
+
+
+# making dataframe named final_result to display Mean absolute error for each dayparts
+
+
+```{r}
+b1 <- t(as.data.frame(mse_A))
+final_result_A <- data.frame(b1, d, network="A")
+colnames(final_result_A) <- c("MAE","daypart","network")
+rownames(final_result_A) <- 1:nrow(b1) 
+final_result_A
+```
+
+
+```{r}
+b2 <- t(as.data.frame(mse_B))
+final_result_B <- data.frame(b2, d, network="B")
+colnames(final_result_B) <- c("MAE","daypart","network")
+rownames(final_result_B) <- 1:nrow(b2)
+final_result_B
+```
+
+
+```{r}
+b3 <- t(as.data.frame(mse_C))
+final_result_C <- data.frame(b3, d, network="C")
+colnames(final_result_C) <- c("MAE","daypart","network")
+rownames(final_result_C) <- 1:nrow(b3)
+final_result_C
+
+```
+
+```{r}
+b4 <- t(as.data.frame(mse_D))
+final_result_D <- data.frame(b4, d, network="D")
+colnames(final_result_D) <- c("MAE","daypart","network")
+rownames(final_result_D) <- 1:nrow(b4)
+final_result_D
+```
+
+```{r}
+b5 <- t(as.data.frame(mse_E))
+final_result_E <- data.frame(b5, d, network="E")
+colnames(final_result_E) <- c("MAE","daypart","network")
+rownames(final_result_E) <- 1:nrow(b5)
+final_result_E
+```
