@@ -6,7 +6,7 @@ output: html_document
 ---
 
 #loading file 
-```{r}
+```{r echo=TRUE}
 df <-  read.csv("C:/Users/patel/Downloads/TV_by_network_daypart.csv")
 
 str(df)
